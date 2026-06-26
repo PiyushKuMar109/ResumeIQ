@@ -1,14 +1,18 @@
 import React, { useEffect, useState } from 'react';
-import { AlertCircle, Download, FileDown, Loader2 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { AlertCircle, Download, FileDown, Loader2, Zap } from 'lucide-react';
 import { getAnalysisHistory } from '../services/analysisService';
 import { generateReport, getReports } from '../services/reportService';
+import { getResumes } from '../services/resumeService';
 import { useToast } from '../context/ToastContext';
 import { extractData, getErrorMessage } from '../utils/apiHelpers';
 
 export default function Reports() {
+  const navigate = useNavigate();
   const { showToast } = useToast();
   const [reports, setReports] = useState([]);
   const [analyses, setAnalyses] = useState([]);
+  const [resumes, setResumes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [downloading, setDownloading] = useState(null);
@@ -18,12 +22,14 @@ export default function Reports() {
     try {
       setLoading(true);
       setError('');
-      const [reportsResponse, analysesResponse] = await Promise.all([
+      const [reportsResponse, analysesResponse, resumesResponse] = await Promise.all([
         getReports(),
         getAnalysisHistory(),
+        getResumes(),
       ]);
       setReports(extractData(reportsResponse) || []);
       setAnalyses(extractData(analysesResponse) || []);
+      setResumes(extractData(resumesResponse) || []);
     } catch (err) {
       setError(getErrorMessage(err, 'Failed to fetch reports'));
     } finally {
@@ -152,12 +158,36 @@ export default function Reports() {
               ))}
             </div>
           </div>
-        ) : (
-          reports.length === 0 && (
-            <div className="text-center py-16 bg-slate-900 border border-slate-800 rounded-2xl">
-              <p className="text-slate-400">No analyses found yet. Upload and analyze a resume first.</p>
+        ) : resumes.length > 0 ? (
+          <div>
+            <h2 className="text-xl font-bold mb-4">Analyze Uploaded Resumes First</h2>
+            <div className="space-y-4">
+              {resumes.map((resume) => (
+                <div
+                  key={resume.id}
+                  className="bg-slate-900 border border-slate-800 rounded-xl p-5 flex items-center justify-between gap-4"
+                >
+                  <div>
+                    <h3 className="text-lg font-semibold">{resume.title}</h3>
+                    <p className="text-sm text-slate-400">
+                      Status: {resume.status} · Uploaded: {new Date(resume.uploaded_at).toLocaleDateString()}
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => navigate(`/analyze/${resume.id}`)}
+                    className="flex items-center gap-2 bg-amber-600 hover:bg-amber-500 px-4 py-2 rounded-xl font-semibold text-sm transition cursor-pointer"
+                  >
+                    <Zap className="w-5 h-5" />
+                    Analyze Resume
+                  </button>
+                </div>
+              ))}
             </div>
-          )
+          </div>
+        ) : (
+          <div className="text-center py-16 bg-slate-900 border border-slate-800 rounded-2xl">
+            <p className="text-slate-400">No resumes found yet. Upload a resume first.</p>
+          </div>
         )}
       </div>
     </div>
