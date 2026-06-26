@@ -27,7 +27,7 @@ services:
           name: resumeiq-db
           property: connectionString
       - key: FRONTEND_URL
-        sync: false
+        value: https://resume-iq-pied-alpha.vercel.app
       - key: CORS_ALLOWED_ORIGINS
         sync: false
       - key: CSRF_TRUSTED_ORIGINS
