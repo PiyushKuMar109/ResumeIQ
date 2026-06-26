@@ -21,13 +21,38 @@ def _ensure_job_roles_seeded():
 
 def _build_match_percentage(parsed_skills, required_skills, keywords, resume_text):
     normalized_resume_skills = {skill.lower(): skill for skill in parsed_skills}
-    matched_skills = [skill for skill in required_skills if skill.lower() in normalized_resume_skills]
-    missing_skills = [skill for skill in required_skills if skill not in matched_skills]
+    matched_skills = []
+    missing_skills = []
+    
+    # Enhanced skill matching with partial matches
+    for skill in required_skills:
+        skill_lower = skill.lower()
+        # Exact match
+        if skill_lower in normalized_resume_skills:
+            matched_skills.append(skill)
+        # Partial match (e.g., "React" matches "React.js" or "React Native")
+        elif any(skill_lower in resume_skill.lower() or resume_skill.lower() in skill_lower 
+                 for resume_skill in parsed_skills):
+            matched_skills.append(skill)
+        else:
+            missing_skills.append(skill)
+    
     skill_score = len(matched_skills) / max(len(required_skills), 1)
     keyword_matches = sum(1 for keyword in keywords if keyword.lower() in resume_text.lower())
     keyword_score = keyword_matches / max(len(keywords), 1)
-    bonus_score = 0.08 if len(matched_skills) >= max(2, len(required_skills) // 2) else 0
-    match_percentage = round(min(1, (skill_score * 0.72 + keyword_score * 0.20 + bonus_score)) * 100, 2)
+    
+    # Dynamic bonus based on skill coverage
+    coverage_ratio = len(matched_skills) / max(len(required_skills), 1)
+    if coverage_ratio >= 0.8:
+        bonus_score = 0.12
+    elif coverage_ratio >= 0.5:
+        bonus_score = 0.08
+    elif coverage_ratio >= 0.3:
+        bonus_score = 0.05
+    else:
+        bonus_score = 0
+    
+    match_percentage = round(min(1, (skill_score * 0.70 + keyword_score * 0.20 + bonus_score)) * 100, 2)
     return match_percentage, matched_skills, missing_skills, keyword_matches
 
 
