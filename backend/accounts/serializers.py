@@ -43,7 +43,7 @@ class RegisterSerializer(serializers.ModelSerializer):
         # Build full_name for your User model
         first_name = (validated_data.pop('first_name', '') or '').strip()
         last_name = (validated_data.pop('last_name', '') or '').strip()
-        full_name = (validated_data.get('full_name') or '').strip()
+        full_name = (validated_data.pop('full_name', '') or '').strip()
 
         if not full_name:
             full_name = f"{first_name} {last_name}".strip()
