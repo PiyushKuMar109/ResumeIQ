@@ -1,6 +1,7 @@
 import React, { createContext, useState, useEffect, useContext } from 'react';
 import * as authService from '../services/authService';
 import { extractData, getStoredUser } from '../utils/apiHelpers';
+import { getApiErrorMessage } from '../config/api';
 
 const AuthContext = createContext(null);
 
@@ -63,10 +64,7 @@ export const AuthProvider = ({ children }) => {
       }
       return { success: true };
     } catch (error) {
-      const message =
-        error.response?.data?.message ||
-        error.response?.data?.detail ||
-        'Invalid email or password.';
+      const message = getApiErrorMessage(error, 'Invalid email or password.');
       return { success: false, error: message };
     }
   };
@@ -86,7 +84,7 @@ export const AuthProvider = ({ children }) => {
       };
     } catch (error) {
       const errors = error.response?.data || {};
-      let errorMsg = errors.message || 'Registration failed.';
+      let errorMsg = getApiErrorMessage(error, 'Registration failed.');
       if (errors.email) errorMsg = `Email: ${errors.email.join?.(' ') || errors.email}`;
       else if (errors.password) errorMsg = `Password: ${errors.password.join?.(' ') || errors.password}`;
       else if (errors.detail) errorMsg = errors.detail;
