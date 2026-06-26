@@ -129,6 +129,18 @@ export default function JobRecommendations() {
                 <h2 className="text-xl font-semibold mb-1">{rec.job_title || 'Recommended Job'}</h2>
                 {rec.company_name && <p className="text-sm text-slate-400 mb-3">{rec.company_name}</p>}
                 {rec.reason && <p className="text-slate-300 text-sm mb-4">{rec.reason}</p>}
+                {rec.matched_skills?.length > 0 && (
+                  <div className="mb-4">
+                    <p className="text-slate-400 text-xs mb-2">Matched Skills</p>
+                    <div className="flex flex-wrap gap-2">
+                      {rec.matched_skills.map((skill, i) => (
+                        <span key={i} className="bg-emerald-500/20 text-emerald-300 px-2 py-1 rounded-lg text-sm">
+                          {skill}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
                 {rec.required_skills?.length > 0 && (
                   <div className="mb-4">
                     <p className="text-slate-400 text-xs mb-2">Required Skills</p>

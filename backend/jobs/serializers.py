@@ -10,10 +10,15 @@ class JobRoleSerializer(serializers.ModelSerializer):
 
 
 class JobRecommendationSerializer(serializers.ModelSerializer):
+    matched_skills = serializers.SerializerMethodField()
+
     class Meta:
         model = JobRecommendation
         fields = [
             'id', 'job_title', 'company_name', 'match_percentage',
-            'required_skills', 'missing_skills', 'reason', 'created_at',
+            'required_skills', 'matched_skills', 'missing_skills', 'reason', 'created_at',
         ]
         read_only_fields = fields
+
+    def get_matched_skills(self, obj):
+        return getattr(obj, 'matched_skills', [])

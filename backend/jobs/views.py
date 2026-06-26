@@ -20,13 +20,15 @@ def _ensure_job_roles_seeded():
 
 
 def _build_match_percentage(parsed_skills, required_skills, keywords, resume_text):
-    matched_skills = [skill for skill in required_skills if skill.lower() in [s.lower() for s in parsed_skills]]
+    normalized_resume_skills = {skill.lower(): skill for skill in parsed_skills}
+    matched_skills = [skill for skill in required_skills if skill.lower() in normalized_resume_skills]
     missing_skills = [skill for skill in required_skills if skill not in matched_skills]
     skill_score = len(matched_skills) / max(len(required_skills), 1)
     keyword_matches = sum(1 for keyword in keywords if keyword.lower() in resume_text.lower())
     keyword_score = keyword_matches / max(len(keywords), 1)
-    match_percentage = round((skill_score * 0.7 + keyword_score * 0.3) * 100, 2)
-    return match_percentage, matched_skills, missing_skills
+    bonus_score = 0.08 if len(matched_skills) >= max(2, len(required_skills) // 2) else 0
+    match_percentage = round(min(1, (skill_score * 0.72 + keyword_score * 0.20 + bonus_score)) * 100, 2)
+    return match_percentage, matched_skills, missing_skills, keyword_matches
 
 
 class JobRoleListCreateView(generics.ListCreateAPIView):
@@ -94,16 +96,16 @@ class JobRecommendView(APIView):
         JobRecommendation.objects.filter(user=request.user, resume=resume).delete()
 
         for role in job_roles:
-            match_percentage, matched_skills, missing_skills = _build_match_percentage(
+            match_percentage, matched_skills, missing_skills, keyword_matches = _build_match_percentage(
                 parsed_resume.skills or [],
                 role.required_skills or [],
                 role.keywords or [],
                 resume.extracted_text or '',
             )
             reason = (
-                f"Your resume matched {len(matched_skills)} required skills for {role.title}. "
-                f"Missing skills: {', '.join(missing_skills)}." if missing_skills else
-                f"Your resume is a strong match for {role.title}."
+                f"Matched {len(matched_skills)} skills and {keyword_matches} keywords for {role.title}. "
+                f"Top matching skills: {', '.join(matched_skills[:4]) or 'none yet'}. "
+                f"Missing skills: {', '.join(missing_skills[:4]) or 'none'}."
             )
             rec = JobRecommendation.objects.create(
                 user=request.user,
@@ -115,10 +117,11 @@ class JobRecommendView(APIView):
                 missing_skills=missing_skills,
                 reason=reason,
             )
+            rec.matched_skills = matched_skills
             recommendations.append(rec)
 
         recommendations.sort(key=lambda item: item.match_percentage, reverse=True)
-        top_recommendations = recommendations[:5]
+        top_recommendations = [item for item in recommendations if item.match_percentage > 0][:8] or recommendations[:8]
         serializer = JobRecommendationSerializer(top_recommendations, many=True)
 
         return Response({
