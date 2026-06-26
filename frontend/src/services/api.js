@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api/';
+const API_URL = (import.meta.env.VITE_API_URL || 'http://localhost:8000/api').replace(/\/+$/, '');
 
 const api = axios.create({
   baseURL: API_URL,
@@ -28,7 +28,7 @@ api.interceptors.response.use(
     const originalRequest = error.config;
     
     // Prevent infinite loops if authentication endpoints fail
-    if (originalRequest.url.includes('auth/login/') || originalRequest.url.includes('auth/refresh/')) {
+    if (originalRequest.url.includes('auth/login/') || originalRequest.url.includes('auth/token/refresh/')) {
       return Promise.reject(error);
     }
 
@@ -38,7 +38,7 @@ api.interceptors.response.use(
 
       if (refreshToken) {
         try {
-          const response = await axios.post(`${API_URL}auth/refresh/`, {
+          const response = await axios.post(`${API_URL}/auth/token/refresh/`, {
             refresh: refreshToken,
           });
 

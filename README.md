@@ -1,257 +1,131 @@
-# 🚀 ResumeIQ – AI Resume Analyzer
+# ResumeIQ - AI Resume Analyzer
 
-ResumeIQ is a full-stack AI-powered Resume Analyzer that helps job seekers optimize their resumes for Applicant Tracking Systems (ATS). Users can upload resumes, receive an ATS score, identify skill gaps, get AI-powered improvement suggestions, generate role-specific interview questions, and download a professional PDF report.
+ResumeIQ is a full-stack resume analysis platform built with React, Vite, Django REST Framework, PostgreSQL, and Gemini. Users can upload resumes, generate ATS analysis, get role recommendations, view interview questions, and download PDF reports.
 
----
+## Stack
 
-## ✨ Features
+- Frontend: React, Vite, Tailwind CSS
+- Backend: Django, Django REST Framework, Simple JWT
+- Database: PostgreSQL
+- AI: Google Gemini API
+- Storage: Local media in development, Amazon S3 recommended in production
 
-* 🔐 JWT Authentication (Register/Login)
-* 📄 Resume Upload (PDF & DOCX)
-* 📑 Resume Parsing & Text Extraction
-* 📊 ATS Score Calculation
-* 🎯 Skill Gap Analysis
-* 🤖 AI Resume Improvement Suggestions (Gemini API)
-* 💼 Job Role Recommendations
-* 💬 Role-Specific Interview Question Generator
-* 📥 PDF Report Generation
-* 👤 User Profile Management
-* 📈 Dashboard with Resume Analytics
-* 📱 Responsive UI
-* 🔒 Protected Routes
-* 🌐 RESTful API Architecture
-
----
-
-## 🛠 Tech Stack
-
-### Frontend
-
-* React.js (Vite)
-* Tailwind CSS
-* React Router
-* Axios
-
-### Backend
-
-* Django
-* Django REST Framework
-* PostgreSQL
-* JWT Authentication (Simple JWT)
-
-### AI & Cloud
-
-* Google Gemini API
-* Amazon S3 (Optional)
-
----
-
-## 📂 Project Structure
+## Project Structure
 
 ```text
 ResumeIQ/
-│── frontend/
-│   ├── src/
-│   ├── public/
-│   └── package.json
-│
-│── backend/
-│   ├── accounts/
-│   ├── resume/
-│   ├── analysis/
-│   ├── jobs/
-│   ├── interview/
-│   ├── reports/
-│   ├── dashboard/
-│   ├── config/
-│   ├── requirements.txt
-│   └── manage.py
-│
-└── README.md
+|-- frontend/
+|-- backend/
+|-- .gitignore
+|-- LICENSE
+|-- README.md
+|-- render.yaml
+|-- vercel.json
 ```
 
----
+## Local Setup
 
-## 🏗 System Architecture
-
-```text
-                React Frontend
-                       │
-                       ▼
-          Django REST Framework API
-                       │
-      ┌─────────────────────────────────┐
-      │ Authentication (JWT)            │
-      │ Resume Upload & Parsing         │
-      │ ATS Analysis                    │
-      │ Skill Gap Analysis              │
-      │ Job Recommendations             │
-      │ Interview Question Generator    │
-      │ PDF Report Generator            │
-      └─────────────────────────────────┘
-                       │
-                       ▼
-               PostgreSQL Database
-```
-
----
-
-## ⚙️ Installation
-
-### 1. Clone the Repository
-
-```bash
-git clone https://github.com/your-username/resumeiq.git
-cd resumeiq
-```
-
-### 2. Backend Setup
+### Backend
 
 ```bash
 cd backend
-
 python -m venv venv
-
-# Windows
 venv\Scripts\activate
-
-# Linux/Mac
-source venv/bin/activate
-
 pip install -r requirements.txt
-
-python manage.py makemigrations
 python manage.py migrate
+python manage.py seed_job_roles
 python manage.py runserver
 ```
 
-### 3. Frontend Setup
+Create `backend/.env` from `backend/.env.example`.
+
+### Frontend
 
 ```bash
 cd frontend
-
 npm install
-
 npm run dev
 ```
 
----
+Create `frontend/.env` from `frontend/.env.example`.
 
-## 🔑 Environment Variables
+## Environment Variables
 
-Create a `.env` file inside the `backend` folder.
+### Backend
 
 ```env
-SECRET_KEY=your_secret_key
-
-DEBUG=True
-
-DB_NAME=resume_analyzer
-DB_USER=postgres
-DB_PASSWORD=your_password
-DB_HOST=localhost
-DB_PORT=5432
-
-GEMINI_API_KEY=your_gemini_api_key
-
+SECRET_KEY=replace-with-a-long-random-production-secret
+DEBUG=False
+ALLOWED_HOSTS=localhost,127.0.0.1
+FRONTEND_URL=https://your-frontend-domain.vercel.app
+CORS_ALLOWED_ORIGINS=https://your-frontend-domain.vercel.app
+CSRF_TRUSTED_ORIGINS=https://your-frontend-domain.vercel.app
+DATABASE_URL=postgres://...
+GEMINI_API_KEY=
 AWS_ACCESS_KEY_ID=
 AWS_SECRET_ACCESS_KEY=
 AWS_STORAGE_BUCKET_NAME=
 AWS_S3_REGION_NAME=ap-south-1
+AWS_S3_CUSTOM_DOMAIN=
 ```
 
----
+### Frontend
 
-## 🔌 API Modules
-
-### Authentication
-
-* Register
-* Login
-* JWT Token Refresh
-* User Profile
-
-### Resume
-
-* Upload Resume
-* View Resumes
-* Delete Resume
-* Resume Parsing
-
-### Analysis
-
-* ATS Score
-* Skill Gap Analysis
-* Resume Suggestions
-
-### Jobs
-
-* Job Role Management
-* Job Recommendations
-
-### Interview
-
-* Role-Specific Interview Questions
-
-### Reports
-
-* Generate PDF Report
-* Download Report
-
-### Dashboard
-
-* Resume Analytics
-* ATS Statistics
-
----
-
-## 📋 Application Workflow
-
-```text
-Register/Login
-      │
-      ▼
-Upload Resume
-      │
-      ▼
-Extract Resume Text
-      │
-      ▼
-Select Job Role
-      │
-      ▼
-Generate ATS Score
-      │
-      ▼
-Skill Gap Analysis
-      │
-      ▼
-Job Recommendations
-      │
-      ▼
-Interview Questions
-      │
-      ▼
-Generate & Download PDF Report
+```env
+VITE_API_URL=https://your-render-service.onrender.com/api
 ```
 
----
+## Deploy Frontend on Vercel
 
-## 🚀 Future Enhancements
+Use the `frontend` directory as the project root.
 
-* AI Cover Letter Generator
-* LinkedIn Profile Analysis
-* Resume Version History
-* Resume Templates
-* Career Roadmap Generator
-* AI Career Assistant Chatbot
-* Multi-language Resume Analysis
-* Email Notifications
+- Framework preset: `Vite`
+- Root directory: `frontend`
+- Build command: `npm run build`
+- Output directory: `dist`
+- Environment variable: `VITE_API_URL=https://your-render-service.onrender.com/api`
 
----
+`vercel.json` is included so client-side routes such as `/dashboard` and `/reports` resolve correctly after refresh.
 
-## 👨‍💻 Author
+## Deploy Backend on Render
 
-**Piyush Kumar**
+This repo includes `render.yaml` for a Render Blueprint deploy.
 
-If you found this project useful, consider giving the repository a ⭐ and feel free to fork it or contribute improvements.
+### Render service settings
+
+- Root directory: `backend`
+- Runtime: `python`
+- Build command: `pip install -r requirements.txt && python manage.py collectstatic --noinput`
+- Pre-deploy command: `python manage.py migrate && python manage.py seed_job_roles`
+- Start command: `gunicorn config.wsgi:application`
+
+### Required Render environment variables
+
+- `SECRET_KEY`
+- `FRONTEND_URL`
+- `CORS_ALLOWED_ORIGINS`
+- `CSRF_TRUSTED_ORIGINS`
+- `GEMINI_API_KEY`
+
+### Notes
+
+- `DATABASE_URL` is wired from the Render PostgreSQL instance in `render.yaml`.
+- Render filesystem is ephemeral. If you want uploaded resumes and generated PDF reports to persist after restarts, configure S3 using the AWS variables above.
+- Production Django settings now enable secure cookies, SSL forwarding, WhiteNoise static serving, and automatic Render hostname support.
+
+## Before Deploying
+
+- Make sure `.env`, `node_modules`, `dist`, `media`, `staticfiles`, and database files are not committed.
+- Confirm the frontend points to the Render backend URL through `VITE_API_URL`.
+- Confirm the backend trusts the deployed Vercel domain through `FRONTEND_URL`, `CORS_ALLOWED_ORIGINS`, and `CSRF_TRUSTED_ORIGINS`.
+- If reports or uploads must persist, configure S3 before going live.
+
+## Production Checklist
+
+- Frontend builds with `npm run build`
+- Backend dependencies include `gunicorn` and `whitenoise`
+- Render database is attached
+- Migrations run on deploy
+- Job roles are seeded on deploy
+- Vercel SPA routing is configured
+- Secrets are kept in platform environment variables only
