@@ -10,15 +10,20 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Initialize environment variables
 env = environ.Env()
-env_file = os.path.join(BASE_DIR, '.env')
-if os.path.exists(env_file):
-    environ.Env.read_env(env_file)
+
+# Read DEBUG from environment first to determine if we should read .env
+DEBUG = env.bool('DEBUG', default=True)
+
+# Only read .env file in development, not in production
+if DEBUG:
+    env_file = os.path.join(BASE_DIR, '.env')
+    if os.path.exists(env_file):
+        environ.Env.read_env(env_file)
 
 # Debug logging for DATABASE_URL (remove after successful deployment)
 print("DATABASE_URL exists:", bool(os.getenv("DATABASE_URL")))
 
 SECRET_KEY = env('SECRET_KEY', default='django-insecure-default-key-for-development-change-me')
-DEBUG = env.bool('DEBUG', default=True)
 ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', default=['localhost', '127.0.0.1'])
 RENDER_EXTERNAL_HOSTNAME = env('RENDER_EXTERNAL_HOSTNAME', default='')
 
@@ -87,33 +92,13 @@ TEMPLATES = [
 WSGI_APPLICATION = 'config.wsgi.application'
 
 # Database configuration - prioritize DATABASE_URL for production
-DATABASE_URL = os.getenv("DATABASE_URL")
-
-if DATABASE_URL:
-    DATABASES = {
-        "default": dj_database_url.parse(
-            DATABASE_URL,
-            conn_max_age=600,
-            ssl_require=True,
-        )
-    }
-else:
-    # Fallback to individual env vars or SQLite for local development
-    DATABASES = {
-        "default": {
-            "ENGINE": "django.db.backends.postgresql",
-            "NAME": os.getenv("DB_NAME"),
-            "USER": os.getenv("DB_USER"),
-            "PASSWORD": os.getenv("DB_PASSWORD"),
-            "HOST": os.getenv("DB_HOST", "localhost"),
-            "PORT": os.getenv("DB_PORT", "5432"),
-        }
-        if os.getenv("DB_NAME")
-        else {
-            "ENGINE": "django.db.backends.sqlite3",
-            "NAME": BASE_DIR / "db.sqlite3",
-        }
-    }
+DATABASES = {
+    'default': dj_database_url.config(
+        default=f'sqlite:///{BASE_DIR / "db.sqlite3"}',
+        conn_max_age=600,
+        ssl_require=True,
+    )
+}
 
 AUTH_PASSWORD_VALIDATORS = [
     {
