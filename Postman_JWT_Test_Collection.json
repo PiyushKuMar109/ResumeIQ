@@ -1,0 +1,220 @@
+{
+  "info": {
+    "_postman_id": "jwt-auth-test",
+    "name": "JWT Authentication Test Collection",
+    "description": "Complete test collection for JWT authentication flow",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "1. Register New User",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"full_name\": \"John Doe\",\n  \"email\": \"john@example.com\",\n  \"password\": \"TestPassword123!\",\n  \"role\": \"USER\"\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/api/auth/register/",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8000",
+          "path": ["api", "auth", "register", ""]
+        },
+        "description": "Register a new user. Should work WITHOUT Authorization header.\nExpected: 201 Created with user data and tokens"
+      },
+      "response": []
+    },
+    {
+      "name": "2. Login User",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"john@example.com\",\n  \"password\": \"TestPassword123!\"\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/api/auth/login/",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8000",
+          "path": ["api", "auth", "login", ""]
+        },
+        "description": "Login with email and password. Should work WITHOUT Authorization header.\nExpected: 200 OK with access and refresh tokens"
+      },
+      "response": []
+    },
+    {
+      "name": "3. Get User Profile (Protected)",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{access_token}}"
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/api/auth/profile/",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8000",
+          "path": ["api", "auth", "profile", ""]
+        },
+        "description": "Get user profile. REQUIRES valid JWT access token in Authorization header.\nExpected: 200 OK with user profile data"
+      },
+      "response": []
+    },
+    {
+      "name": "4. Refresh Token",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"refresh\": \"{{refresh_token}}\"\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/api/auth/refresh/",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8000",
+          "path": ["api", "auth", "refresh", ""]
+        },
+        "description": "Refresh the access token using refresh token. Should work WITHOUT Authorization header.\nExpected: 200 OK with new access token"
+      },
+      "response": []
+    },
+    {
+      "name": "5. Update Profile (Protected)",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{access_token}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"full_name\": \"John Updated\"\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/api/auth/profile/",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8000",
+          "path": ["api", "auth", "profile", ""]
+        },
+        "description": "Update user profile. REQUIRES valid JWT access token.\nExpected: 200 OK with updated profile"
+      },
+      "response": []
+    },
+    {
+      "name": "6. Logout (Protected)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{access_token}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"refresh\": \"{{refresh_token}}\"\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/api/auth/logout/",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8000",
+          "path": ["api", "auth", "logout", ""]
+        },
+        "description": "Logout and blacklist refresh token. REQUIRES valid JWT access token.\nExpected: 200 OK with logout message"
+      },
+      "response": []
+    },
+    {
+      "name": "TEST: Invalid Token",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer invalid.token.here"
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/api/auth/profile/",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8000",
+          "path": ["api", "auth", "profile", ""]
+        },
+        "description": "Test with invalid token. Should return 401 Unauthorized.\nExpected: 401 with error message"
+      },
+      "response": []
+    },
+    {
+      "name": "TEST: Missing Token",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/api/auth/profile/",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8000",
+          "path": ["api", "auth", "profile", ""]
+        },
+        "description": "Test without token on protected endpoint. Should return 401 Unauthorized.\nExpected: 401 with error message"
+      },
+      "response": []
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:8000",
+      "type": "string"
+    },
+    {
+      "key": "access_token",
+      "value": "",
+      "type": "string",
+      "description": "Set this after login with the access token from response"
+    },
+    {
+      "key": "refresh_token",
+      "value": "",
+      "type": "string",
+      "description": "Set this after login with the refresh token from response"
+    }
+  ]
+}

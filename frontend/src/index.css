@@ -1,0 +1,104 @@
+@import "tailwindcss";
+
+:root {
+  font-family: "Sora", "Segoe UI", system-ui, -apple-system, sans-serif;
+  color-scheme: light;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at top left, rgba(251, 191, 36, 0.12), transparent 26%),
+    radial-gradient(circle at 85% 8%, rgba(251, 146, 60, 0.08), transparent 24%),
+    linear-gradient(180deg, #f8f4ec 0%, #f6f3ee 100%);
+  color: #292524;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+:focus-visible {
+  outline: 2px solid #f59e0b;
+  outline-offset: 2px;
+}
+
+input,
+select,
+textarea {
+  color: #292524;
+}
+
+::placeholder {
+  color: #a8a29e;
+}
+
+.bg-slate-950 {
+  background-color: #fcfaf6 !important;
+}
+
+.bg-slate-900 {
+  background-color: #ffffff !important;
+}
+
+.bg-slate-800 {
+  background-color: #f8f5ef !important;
+}
+
+.border-slate-800,
+.border-slate-700 {
+  border-color: #e7e1d6 !important;
+}
+
+.text-slate-100,
+.text-slate-200,
+.text-slate-300 {
+  color: #292524 !important;
+}
+
+.text-slate-400 {
+  color: #78716c !important;
+}
+
+.text-slate-500 {
+  color: #a8a29e !important;
+}
+
+.text-slate-600 {
+  color: #57534e !important;
+}
+
+.placeholder-slate-500::placeholder,
+.placeholder-slate-600::placeholder {
+  color: #a8a29e !important;
+}
+
+.hover\:bg-slate-700:hover,
+.hover\:bg-slate-800:hover,
+.hover\:bg-slate-850:hover {
+  background-color: #f2ede5 !important;
+}
+
+.hover\:text-slate-200:hover,
+.hover\:text-slate-300:hover,
+.hover\:text-white:hover {
+  color: #1c1917 !important;
+}
+
+.bg-red-500\/10 {
+  background-color: rgba(248, 113, 113, 0.08) !important;
+}
+
+.bg-amber-500\/10 {
+  background-color: rgba(251, 191, 36, 0.12) !important;
+}
+
+.shadow-lg,
+.shadow-sm {
+  box-shadow: 0 12px 30px rgba(41, 37, 36, 0.06) !important;
+}
