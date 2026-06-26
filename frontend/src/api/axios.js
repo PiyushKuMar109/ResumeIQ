@@ -3,10 +3,7 @@ import { API_URL, API_URLS } from '../config/api';
 
 
 const API = axios.create({
-  baseURL: API_URL,
-  headers: {
-    'Content-Type': 'application/json',
-  },
+  baseURL: import.meta.env.VITE_API_URL,
 });
 
 const publicUrls = ['/auth/login/', '/auth/register/', '/auth/token/refresh/'];
