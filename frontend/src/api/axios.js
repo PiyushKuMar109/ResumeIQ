@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { API_URL } from '../config/api';
+import { API_URL, API_URLS } from '../config/api';
 
 
 const API = axios.create({
@@ -64,6 +64,17 @@ API.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
+    const currentBaseUrl = originalRequest?.baseURL || API.defaults.baseURL;
+
+    if (!error.response && originalRequest && !originalRequest._networkRetry) {
+      const fallbackBaseUrl = API_URLS.find((url) => url !== currentBaseUrl);
+
+      if (fallbackBaseUrl) {
+        originalRequest._networkRetry = true;
+        originalRequest.baseURL = fallbackBaseUrl;
+        return API(originalRequest);
+      }
+    }
 
     if (
       originalRequest?.url?.includes('auth/login/') ||

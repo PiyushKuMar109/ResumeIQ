@@ -1,19 +1,26 @@
 const LOCAL_API_URL = 'http://localhost:8000/api';
-const DEFAULT_PRODUCTION_API_URL = 'https://resumeiq-backend.onrender.com/api';
+const DEFAULT_PRODUCTION_API_URLS = [
+  'https://resumeiq-4ebt.onrender.com/api',
+  'https://resumeiq-backend.onrender.com/api',
+];
 
 const trimTrailingSlashes = (value) => value.replace(/\/+$/, '');
 
+const configuredApiUrls = [
+  import.meta.env.VITE_API_URL,
+  import.meta.env.VITE_API_BASE_URL,
+]
+  .filter(Boolean)
+  .map((value) => trimTrailingSlashes(value.trim()));
+
+export const API_URLS = [...new Set(
+  import.meta.env.DEV
+    ? [...configuredApiUrls, LOCAL_API_URL]
+    : [...configuredApiUrls, ...DEFAULT_PRODUCTION_API_URLS],
+)];
+
 export const API_URL = (() => {
-  const configuredUrl = import.meta.env.VITE_API_URL?.trim();
-  if (configuredUrl) {
-    return trimTrailingSlashes(configuredUrl);
-  }
-
-  if (import.meta.env.DEV) {
-    return LOCAL_API_URL;
-  }
-
-  return DEFAULT_PRODUCTION_API_URL;
+  return API_URLS[0];
 })();
 
 export const getApiErrorMessage = (error, fallback = 'Something went wrong.') => {
@@ -29,7 +36,7 @@ export const getApiErrorMessage = (error, fallback = 'Something went wrong.') =>
   }
 
   if (!error?.response) {
-    return `Unable to reach the server. Check that the frontend is connected to ${API_URL}.`;
+    return `Unable to reach the server. Check that the frontend is connected to ${API_URLS.join(' or ')}.`;
   }
 
   return fallback;

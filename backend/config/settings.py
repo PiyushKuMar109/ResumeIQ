@@ -159,16 +159,27 @@ CORS_ALLOWED_ORIGINS = env.list(
     'CORS_ALLOWED_ORIGINS',
     default=['http://localhost:5173', 'http://localhost:3000'],
 )
+CORS_ALLOWED_ORIGIN_REGEXES = env.list(
+    'CORS_ALLOWED_ORIGIN_REGEXES',
+    default=[r'^https:\/\/.*\.vercel\.app$'],
+)
+
+FRONTEND_URLS = [url.rstrip('/') for url in env.list('FRONTEND_URLS', default=[])]
 FRONTEND_URL = env('FRONTEND_URL', default='').rstrip('/')
-if FRONTEND_URL and FRONTEND_URL not in CORS_ALLOWED_ORIGINS:
-    CORS_ALLOWED_ORIGINS.append(FRONTEND_URL)
+if FRONTEND_URL:
+    FRONTEND_URLS.append(FRONTEND_URL)
+
+for frontend_url in FRONTEND_URLS:
+    if frontend_url and frontend_url not in CORS_ALLOWED_ORIGINS:
+        CORS_ALLOWED_ORIGINS.append(frontend_url)
 
 CSRF_TRUSTED_ORIGINS = env.list(
     'CSRF_TRUSTED_ORIGINS',
-    default=['http://localhost:5173', 'http://localhost:3000'],
+    default=['http://localhost:5173', 'http://localhost:3000', 'https://*.vercel.app'],
 )
-if FRONTEND_URL and FRONTEND_URL not in CSRF_TRUSTED_ORIGINS:
-    CSRF_TRUSTED_ORIGINS.append(FRONTEND_URL)
+for frontend_url in FRONTEND_URLS:
+    if frontend_url and frontend_url not in CSRF_TRUSTED_ORIGINS:
+        CSRF_TRUSTED_ORIGINS.append(frontend_url)
 
 CORS_ALLOW_CREDENTIALS = True
 
