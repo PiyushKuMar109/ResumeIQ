@@ -18,6 +18,7 @@ import InterviewQuestions from './pages/InterviewQuestions';
 import JobRecommendations from './pages/JobRecommendations';
 import Reports from './pages/Reports';
 import Profile from './pages/Profile';
+import TailorResume from './pages/TailorResume';
 import NotFound from './pages/NotFound';
 
 function App() {
@@ -43,6 +44,7 @@ function App() {
                 <Route path="/interview/:resumeId" element={<InterviewQuestions />} />
                 <Route path="/jobs" element={<JobRecommendations />} />
                 <Route path="/reports" element={<Reports />} />
+                <Route path="/resumes/:id/enhance" element={<TailorResume />} />
                 <Route path="/profile" element={<Profile />} />
               </Route>
             </Route>

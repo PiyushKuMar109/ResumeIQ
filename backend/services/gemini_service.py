@@ -126,7 +126,6 @@ def generate_interview_questions(resume_text: str, job_role: dict, difficulty: s
 def generate_career_advice(parsed_resume: dict) -> list:
     if not parsed_resume:
         return ['Update your profile with more details to get personalized career advice.']
-    summary = parsed_resume.get('summary') or ''
     prompt = (
         f"Review the parsed resume details and provide 5 career advice items based on skills {parsed_resume.get('skills', [])} "
         f"and experience sections.\nParsed Resume:\n{parsed_resume}\n"
@@ -150,3 +149,99 @@ def improve_project_description(project_text: str) -> str:
     if result:
         return result.strip()
     return project_text.strip() or 'Improved project description should include measurable outcomes and technologies used.'
+
+
+def generate_tailored_resume(parsed_resume: dict, job_title: str, job_description: str) -> dict:
+    import json
+    import re
+    
+    # Extract existing sections
+    skills = parsed_resume.get('skills', [])
+    experience = parsed_resume.get('experience', [])
+    projects = parsed_resume.get('projects', [])
+    
+    prompt = (
+        f"You are an expert ATS (Applicant Tracking System) optimizer and professional resume writer.\n"
+        f"Your task is to tailor a candidate's resume for the role of '{job_title}' based on the provided Job Description.\n\n"
+        f"Job Description:\n{job_description}\n\n"
+        f"Candidate's Current Resume Data:\n"
+        f"- Skills: {skills}\n"
+        f"- Work Experience Items:\n"
+    )
+    
+    for i, exp in enumerate(experience):
+        prompt += f"  [{i}] {exp}\n"
+    
+    prompt += "- Project Items:\n"
+    for i, proj in enumerate(projects):
+        prompt += f"  [{i}] {proj}\n"
+        
+    prompt += (
+        f"\nInstructions:\n"
+        f"1. Generate a tailored professional summary (3-4 sentences) that highlights the candidate's matching experience and aligns with the job description.\n"
+        f"2. For each work experience item, rewrite it to be more compelling and highlight keywords/skills relevant to the job description while preserving the original facts. Provide a 1-sentence reason why this change helps.\n"
+        f"3. For each project item, rewrite it to highlight relevant engineering achievements and keywords. Provide a 1-sentence reason why this change helps.\n"
+        f"4. Suggest a tailored list of skills (keep existing skills and add relevant missing ones from the job description).\n"
+        f"5. Calculate a match_score (float, 0-100) indicating how well this tailored profile matches the job description.\n"
+        f"6. List 3 overall suggestions/tips for this candidate.\n\n"
+        f"You MUST respond ONLY with a valid JSON object matching the exact schema below. Do not include markdown code block formatting (like ```json). Just the raw JSON string.\n\n"
+        f"Schema:\n"
+        f"{{\n"
+        f"  \"summary\": \"tailored summary text\",\n"
+        f"  \"experience\": [\n"
+        f"    {{\"original\": \"original text\", \"tailored\": \"rewritten experience text\", \"reason\": \"explanation of change\"}}\n"
+        f"  ],\n"
+        f"  \"projects\": [\n"
+        f"    {{\"original\": \"original text\", \"tailored\": \"rewritten project text\", \"reason\": \"explanation of change\"}}\n"
+        f"  ],\n"
+        f"  \"skills\": [\"skill1\", \"skill2\"],\n"
+        f"  \"match_score\": 85.5,\n"
+        f"  \"suggestions\": [\"tip1\", \"tip2\", \"tip3\"]\n"
+        f"}}\n"
+    )
+    
+    result = _query_gemini(prompt, max_output_tokens=1500)
+    
+    # Try to parse JSON from the result
+    if result:
+        # Clean potential markdown wrapping
+        cleaned = result.strip()
+        if cleaned.startswith("```"):
+            cleaned = re.sub(r'^```(?:json)?\n', '', cleaned)
+            cleaned = re.sub(r'\n```$', '', cleaned)
+        cleaned = cleaned.strip()
+        
+        try:
+            parsed = json.loads(cleaned)
+            return parsed
+        except Exception:
+            logging.exception("Failed to parse Gemini tailored resume response as JSON. Content: %s", result)
+            
+    # Fallback structure if Gemini fails or JSON is corrupt
+    fallback_experience = []
+    for exp in experience:
+        fallback_experience.append({
+            "original": exp,
+            "tailored": exp,
+            "reason": "Ensure you explicitly highlight accomplishments that match the requirements."
+        })
+    fallback_projects = []
+    for proj in projects:
+        fallback_projects.append({
+            "original": proj,
+            "tailored": proj,
+            "reason": "Mention the technologies and architectural decisions made."
+        })
+        
+    return {
+        "summary": f"Experienced professional tailored for the {job_title} role.",
+        "experience": fallback_experience,
+        "projects": fallback_projects,
+        "skills": skills,
+        "match_score": 60.0,
+        "suggestions": [
+            "Tailor your bullet points to show quantified impact and achievements.",
+            "Make sure keywords from the job description are prominent in your skills list.",
+            "Use standard fonts and layout styles to pass ATS filters."
+        ]
+    }

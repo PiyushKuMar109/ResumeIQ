@@ -3,7 +3,11 @@ import importlib.util
 from pathlib import Path
 from datetime import timedelta
 import environ
-import dj_database_url
+
+try:
+    import dj_database_url
+except ImportError:
+    dj_database_url = None
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -11,21 +15,19 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Initialize environment variables
 env = environ.Env()
 
-# Read DEBUG from environment first to determine if we should read .env
+# Prefer the project's local env file for development runs.
+env_file = os.path.join(BASE_DIR, '.env')
+if os.path.exists(env_file):
+    environ.Env.read_env(env_file, overwrite=True)
+
 DEBUG = env.bool('DEBUG', default=True)
-
-# Only read .env file in development, not in production
-if DEBUG:
-    env_file = os.path.join(BASE_DIR, '.env')
-    if os.path.exists(env_file):
-        environ.Env.read_env(env_file)
-
-# Debug logging for DATABASE_URL (remove after successful deployment)
-print("DATABASE_URL exists:", bool(os.getenv("DATABASE_URL")))
 
 SECRET_KEY = env('SECRET_KEY', default='django-insecure-default-key-for-development-change-me')
 ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', default=['localhost', '127.0.0.1'])
 RENDER_EXTERNAL_HOSTNAME = env('RENDER_EXTERNAL_HOSTNAME', default='')
+
+print("DEBUG =", DEBUG)
+print("DATABASE_URL =", os.getenv("DATABASE_URL"))
 
 if RENDER_EXTERNAL_HOSTNAME and RENDER_EXTERNAL_HOSTNAME not in ALLOWED_HOSTS:
     ALLOWED_HOSTS.append(RENDER_EXTERNAL_HOSTNAME)
@@ -91,14 +93,33 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'config.wsgi.application'
 
-# Database configuration - prioritize DATABASE_URL for production
-DATABASES = {
-    'default': dj_database_url.config(
-        default=f'sqlite:///{BASE_DIR / "db.sqlite3"}',
-        conn_max_age=600,
-        ssl_require=True,
-    )
-}
+# Database configuration:
+# - Local development uses DB_* values and never forces SSL.
+# - Production uses DATABASE_URL and requires SSL.
+if DEBUG:
+    DATABASES = {
+        'default': {
+            'ENGINE': env('DB_ENGINE', default='django.db.backends.postgresql'),
+            'NAME': env('DB_NAME', default='ResumeIQ'),
+            'USER': env('DB_USER', default='postgres'),
+            'PASSWORD': env('DB_PASSWORD', default=''),
+            'HOST': env('DB_HOST', default='localhost'),
+            'PORT': env('DB_PORT', default='5432'),
+        }
+    }
+else:
+    if dj_database_url is None:
+        raise ImportError(
+            "dj_database_url is required when DEBUG=False. "
+            "Install backend requirements or run with local development settings."
+        )
+    DATABASES = {
+        'default': dj_database_url.config(
+            default=env('DATABASE_URL'),
+            conn_max_age=600,
+            ssl_require=True,
+        )
+    }
 
 AUTH_PASSWORD_VALIDATORS = [
     {

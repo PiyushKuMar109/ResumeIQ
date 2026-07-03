@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Resume, ParsedResume
+from .models import Resume, ParsedResume, TailoredResume
 
 
 class ParsedResumeSerializer(serializers.ModelSerializer):
@@ -39,3 +39,20 @@ class ResumeUploadSerializer(serializers.ModelSerializer):
         if file.size > 5 * 1024 * 1024:
             raise serializers.ValidationError('File size must be 5MB or smaller.')
         return file
+
+
+class TailoredResumeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TailoredResume
+        fields = [
+            'id', 'original_resume', 'job_title', 'job_description',
+            'summary', 'experience', 'projects', 'skills', 'match_score',
+            'suggestions', 'created_at'
+        ]
+        read_only_fields = ['id', 'created_at']
+
+
+class TailoredResumeCreateSerializer(serializers.Serializer):
+    job_title = serializers.CharField(max_length=255)
+    job_description = serializers.CharField()
+

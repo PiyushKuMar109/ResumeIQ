@@ -35,7 +35,8 @@ class RegisterSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         # User model has: full_name, email, role, phone_number, ...
-        fields = ['full_name', 'email', 'password', 'role', 'first_name', 'last_name', 'phone_number', 'department']
+        # role is excluded to prevent users from registering as administrators
+        fields = ['full_name', 'email', 'password', 'first_name', 'last_name', 'phone_number', 'department']
 
     def create(self, validated_data):
         password = validated_data.pop('password')
@@ -75,3 +76,14 @@ class LoginResponseSerializer(serializers.Serializer):
     user = UserSerializer()
     access = serializers.CharField()
     refresh = serializers.CharField()
+
+
+class ChangePasswordSerializer(serializers.Serializer):
+    old_password = serializers.CharField(write_only=True, required=True)
+    new_password = serializers.CharField(write_only=True, required=True, min_length=8)
+    confirm_password = serializers.CharField(write_only=True, required=True)
+
+    def validate(self, attrs):
+        if attrs['new_password'] != attrs['confirm_password']:
+            raise serializers.ValidationError("New passwords do not match")
+        return attrs

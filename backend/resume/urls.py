@@ -5,6 +5,9 @@ from .views import (
     ResumeDetailView,
     ResumeDeleteView,
     ResumeParseView,
+    TailoredResumeCreateView,
+    TailoredResumeListView,
+    TailoredResumeDetailView,
 )
 
 urlpatterns = [
@@ -13,4 +16,8 @@ urlpatterns = [
     path('<int:pk>/', ResumeDetailView.as_view(), name='resume_detail'),
     path('<int:pk>/delete/', ResumeDeleteView.as_view(), name='resume_delete'),
     path('<int:pk>/parse/', ResumeParseView.as_view(), name='resume_parse'),
+    path('<int:pk>/tailor/', TailoredResumeCreateView.as_view(), name='resume_tailor'),
+    path('tailored/', TailoredResumeListView.as_view(), name='tailored_resume_list'),
+    path('tailored/<int:pk>/', TailoredResumeDetailView.as_view(), name='tailored_resume_detail'),
 ]
+

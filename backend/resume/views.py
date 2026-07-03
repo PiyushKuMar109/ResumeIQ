@@ -1,13 +1,15 @@
 import os
+import os
 from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from django.shortcuts import get_object_or_404
 
-from .models import Resume, ParsedResume
-from .serializers import ResumeUploadSerializer, ResumeSerializer
+from .models import Resume, ParsedResume, TailoredResume
+from .serializers import ResumeUploadSerializer, ResumeSerializer, TailoredResumeSerializer, TailoredResumeCreateSerializer
 from .utils import parse_resume
+from services.gemini_service import generate_tailored_resume
 
 
 class ResumeUploadView(APIView):
@@ -160,3 +162,103 @@ class ResumeParseView(APIView):
                 'message': 'Resume parsing failed',
                 'errors': str(exc),
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class TailoredResumeCreateView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, pk):
+        resume = get_object_or_404(Resume, pk=pk, user=request.user)
+        if resume.status != Resume.STATUS_PROCESSED:
+            return Response({
+                'success': False,
+                'message': 'Resume is not processed. Please parse the resume first.',
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        parsed_data = getattr(resume, 'parsed_data', None)
+        if not parsed_data:
+            return Response({
+                'success': False,
+                'message': 'Parsed resume data not found.',
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        serializer = TailoredResumeCreateSerializer(data=request.data)
+        if not serializer.is_valid():
+            return Response({
+                'success': False,
+                'message': 'Invalid data',
+                'errors': serializer.errors,
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        job_title = serializer.validated_data['job_title']
+        job_description = serializer.validated_data['job_description']
+
+        # Call Gemini service to tailor resume
+        parsed_resume_dict = {
+            'skills': parsed_data.skills or [],
+            'experience': parsed_data.experience or [],
+            'projects': parsed_data.projects or [],
+        }
+        
+        try:
+            tailored_data = generate_tailored_resume(parsed_resume_dict, job_title, job_description)
+            
+            # Save TailoredResume object
+            tailored_resume = TailoredResume.objects.create(
+                user=request.user,
+                original_resume=resume,
+                job_title=job_title,
+                job_description=job_description,
+                summary=tailored_data.get('summary', ''),
+                experience=tailored_data.get('experience', []),
+                projects=tailored_data.get('projects', []),
+                skills=tailored_data.get('skills', []),
+                match_score=tailored_data.get('match_score', 0.0),
+                suggestions=tailored_data.get('suggestions', []),
+            )
+            
+            return Response({
+                'success': True,
+                'message': 'Resume tailored successfully',
+                'data': TailoredResumeSerializer(tailored_resume).data,
+            }, status=status.HTTP_201_CREATED)
+            
+        except Exception as e:
+            return Response({
+                'success': False,
+                'message': 'Failed to generate tailored resume suggestions.',
+                'errors': str(e),
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class TailoredResumeListView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        resumes = TailoredResume.objects.filter(user=request.user).order_by('-created_at')
+        serializer = TailoredResumeSerializer(resumes, many=True)
+        return Response({
+            'success': True,
+            'message': 'Tailored resumes fetched successfully',
+            'data': serializer.data,
+        })
+
+
+class TailoredResumeDetailView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, pk):
+        tailored = get_object_or_404(TailoredResume, pk=pk, user=request.user)
+        return Response({
+            'success': True,
+            'message': 'Tailored resume fetched successfully',
+            'data': TailoredResumeSerializer(tailored).data,
+        })
+
+    def delete(self, request, pk):
+        tailored = get_object_or_404(TailoredResume, pk=pk, user=request.user)
+        tailored.delete()
+        return Response({
+            'success': True,
+            'message': 'Tailored resume deleted successfully',
+        }, status=status.HTTP_200_OK)

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Loader2, AlertCircle, Zap, HelpCircle } from 'lucide-react';
+import { ArrowLeft, Loader2, AlertCircle, Zap, HelpCircle, Sparkles } from 'lucide-react';
 import { getResumeById } from '../services/resumeService';
 import { extractData, getErrorMessage } from '../utils/apiHelpers';
 
@@ -66,6 +66,13 @@ export default function ResumeDetails() {
                 >
                   <Zap className="w-4 h-4" />
                   Analyze
+                </button>
+                <button
+                  onClick={() => navigate(`/resumes/${id}/enhance`)}
+                  className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-500 px-4 py-2 rounded-xl text-sm font-semibold transition cursor-pointer"
+                >
+                  <Sparkles className="w-4 h-4" />
+                  Tailor
                 </button>
                 <button
                   onClick={() => navigate(`/interview/${id}`)}

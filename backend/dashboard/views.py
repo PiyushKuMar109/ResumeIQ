@@ -7,6 +7,8 @@ from accounts.permissions import IsAdminRole
 from resume.models import Resume
 from analysis.models import ResumeAnalysis
 from jobs.models import JobRole
+from .models import Notification
+from .serializers import NotificationSerializer
 
 
 class DashboardSummaryView(APIView):
@@ -79,4 +81,65 @@ class AdminDashboardSummaryView(APIView):
                 'top_missing_skills': [skill for skill, _ in top_missing_skills],
                 'popular_job_roles': [role['title'] for role in popular_job_roles],
             },
+        })
+
+
+class NotificationListView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        notifications = Notification.objects.filter(user=request.user).order_by('-created_at')
+        serializer = NotificationSerializer(notifications, many=True)
+        return Response({
+            'success': True,
+            'message': 'Notifications fetched successfully',
+            'data': serializer.data,
+        })
+
+
+class NotificationMarkReadView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, pk):
+        notification = Notification.objects.filter(pk=pk, user=request.user).first()
+        if not notification:
+            return Response({
+                'success': False,
+                'message': 'Notification not found',
+            }, status=status.HTTP_404_NOT_FOUND)
+
+        notification.is_read = True
+        notification.save()
+        return Response({
+            'success': True,
+            'message': 'Notification marked as read',
+        })
+
+
+class NotificationMarkAllReadView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        Notification.objects.filter(user=request.user, is_read=False).update(is_read=True)
+        return Response({
+            'success': True,
+            'message': 'All notifications marked as read',
+        })
+
+
+class NotificationDeleteView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def delete(self, request, pk):
+        notification = Notification.objects.filter(pk=pk, user=request.user).first()
+        if not notification:
+            return Response({
+                'success': False,
+                'message': 'Notification not found',
+            }, status=status.HTTP_404_NOT_FOUND)
+
+        notification.delete()
+        return Response({
+            'success': True,
+            'message': 'Notification deleted successfully',
         })

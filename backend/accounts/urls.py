@@ -7,6 +7,7 @@ from .views import (
     LogoutView,
     ProfileView,
     RevokeTokenView,
+    ChangePasswordView,
 )
 
 
@@ -29,5 +30,6 @@ urlpatterns = [
     path('refresh/revoke/', RevokeTokenView.as_view(), name='token_revoke'),
     path('profile/', ProfileView.as_view(), name='profile'),
     path('profile/update/', ProfileView.as_view(), name='profile_update'),
+    path('change-password/', ChangePasswordView.as_view(), name='change_password'),
 ]
 

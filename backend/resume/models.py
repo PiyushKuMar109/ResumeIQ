@@ -45,3 +45,25 @@ class ParsedResume(models.Model):
 
     def __str__(self):
         return f"Parsed Resume for {self.resume.title}"
+
+
+class TailoredResume(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='tailored_resumes')
+    original_resume = models.ForeignKey(Resume, on_delete=models.CASCADE, related_name='tailored_versions')
+    job_title = models.CharField(max_length=255)
+    job_description = models.TextField()
+    
+    # AI Tailored content
+    summary = models.TextField(blank=True)
+    experience = models.JSONField(default=list, blank=True) # list of {"original": str, "tailored": str, "reason": str}
+    projects = models.JSONField(default=list, blank=True)   # list of {"original": str, "tailored": str, "reason": str}
+    skills = models.JSONField(default=list, blank=True)     # list of strings (matched/suggested skills)
+    
+    # Overall feedback & metrics
+    match_score = models.FloatField(default=0.0)
+    suggestions = models.JSONField(default=list, blank=True) # list of strings (overall tips)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Tailored for {self.job_title} - {self.original_resume.title}"
+
