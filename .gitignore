@@ -1,0 +1,31 @@
+# Environment variables
+.env
+backend/.env
+frontend/.env.local
+
+# Python caches and virtual environments
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.venv/
+venv/
+ENV/
+env/
+
+# Databases
+*.sqlite3
+
+# Node dependencies and build folders
+node_modules/
+dist/
+.eslintcache
+
+# Editor configurations
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
