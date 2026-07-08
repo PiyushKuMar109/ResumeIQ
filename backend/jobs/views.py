@@ -4,8 +4,8 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 from rest_framework.response import Response
 
-from .models import JobRole, JobRecommendation
-from .serializers import JobRoleSerializer, JobRecommendationSerializer
+from .models import JobRole, JobRecommendation, JobApplication
+from .serializers import JobRoleSerializer, JobRecommendationSerializer, JobApplicationSerializer
 from accounts.permissions import IsAdminRole
 from resume.models import Resume
 from .management.commands.seed_job_roles import JOB_ROLES
@@ -154,3 +154,76 @@ class JobRecommendView(APIView):
             'message': 'Job recommendations created successfully',
             'data': serializer.data,
         }, status=status.HTTP_200_OK)
+
+
+class JobApplicationListCreateView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        apps = JobApplication.objects.filter(user=request.user).order_by('-updated_at')
+        serializer = JobApplicationSerializer(apps, many=True)
+        return Response({
+            'success': True,
+            'message': 'Job applications fetched successfully',
+            'data': serializer.data,
+        })
+
+    def post(self, request):
+        serializer = JobApplicationSerializer(data=request.data)
+        if not serializer.is_valid():
+            return Response({
+                'success': False,
+                'message': 'Invalid payload',
+                'errors': serializer.errors,
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        job_app = JobApplication.objects.create(
+            user=request.user,
+            job_title=serializer.validated_data['job_title'],
+            company_name=serializer.validated_data['company_name'],
+            stage=serializer.validated_data.get('stage', 'BOOKMARKED'),
+            notes=serializer.validated_data.get('notes', ''),
+        )
+        return Response({
+            'success': True,
+            'message': 'Job application created successfully',
+            'data': JobApplicationSerializer(job_app).data,
+        }, status=status.HTTP_201_CREATED)
+
+
+class JobApplicationDetailView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, pk):
+        job_app = get_object_or_404(JobApplication, pk=pk, user=request.user)
+        return Response({
+            'success': True,
+            'message': 'Job application fetched successfully',
+            'data': JobApplicationSerializer(job_app).data,
+        })
+
+    def put(self, request, pk):
+        job_app = get_object_or_404(JobApplication, pk=pk, user=request.user)
+        serializer = JobApplicationSerializer(job_app, data=request.data, partial=True)
+        if not serializer.is_valid():
+            return Response({
+                'success': False,
+                'message': 'Invalid update payload',
+                'errors': serializer.errors,
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        serializer.save()
+        return Response({
+            'success': True,
+            'message': 'Job application updated successfully',
+            'data': serializer.data,
+        })
+
+    def delete(self, request, pk):
+        job_app = get_object_or_404(JobApplication, pk=pk, user=request.user)
+        job_app.delete()
+        return Response({
+            'success': True,
+            'message': 'Job application deleted successfully',
+        }, status=status.HTTP_200_OK)
+

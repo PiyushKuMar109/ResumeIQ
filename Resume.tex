@@ -1,0 +1,110 @@
+\documentclass[10pt,letterpaper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[margin=0.4in]{geometry}
+\usepackage{enumitem}
+\usepackage{hyperref}
+
+% Page styling
+\pagestyle{plain}
+\setlength{\parindent}{0pt}
+
+% Color links setup (seamless black links to match printed document)
+\hypersetup{
+    colorlinks=true,
+    linkcolor=black,
+    filecolor=black,      
+    urlcolor=black,
+}
+
+% Global itemize formatting to match the compact spacing in your original resume
+\setlist[itemize]{leftmargin=0.15in, noitemsep, topsep=1pt, parsep=0.5pt, partopsep=0pt}
+
+% Section heading helper
+\newcommand{\resumesection}[1]{
+    \vspace{6pt}
+    {\large\bfseries #1}
+    \vspace{2pt}
+    \hrule
+    \vspace{3pt}
+}
+
+\begin{document}
+
+% ==================== HEADER ====================
+\begin{center}
+    {\Huge\bfseries PIYUSH KUMAR} \\
+    \vspace{3pt}
+    \small +91-7048941184 \ --- \ \href{mailto:piyushbaskar4@gmail.com}{piyushbaskar4@gmail.com} \ --- \ \href{https://linkedin.com/in/piyushkumar}{linkedin.com/in/piyushkumar} \ --- \ \href{https://github.com/piyushkumar}{github.com/piyushkumar}
+\end{center}
+
+% ==================== EDUCATION ====================
+\resumesection{Education}
+\textbf{Satyug Darshan Institute of Engineering \& Technology} \hfill 2022 -- 2026 \\
+B.Tech in Computer Science Engineering \hfill Faridabad, Haryana
+
+% ==================== EXPERIENCE ====================
+\resumesection{Experience}
+\textbf{Technical Engineer Intern} \hfill Aug 2025 -- Nov 2025 \\
+VAAAN Infra \hfill Faridabad, Haryana
+\begin{itemize}
+    \item Built a Python automation tool to analyze FASTag--ANPR mismatch data from CSV files, eliminating manual verification and improving operational efficiency.
+    \item Generated automated plaza-wise mismatch and accuracy reports, enabling faster resolution of incorrect number plate reads and billing discrepancies.
+    \item Diagnosed and resolved system-level issues using debugging workflows and log analysis.
+    \item Improved operational efficiency through troubleshooting documentation and workflow optimization.
+\end{itemize}
+
+% ==================== PROJECTS ====================
+\resumesection{Projects}
+
+\textbf{ResumeIQ --- AI Resume Analyzer} \hfill 2026 \\
+\textit{React.js, Vite, Django REST Framework, PostgreSQL, Google Gemini API, JWT, AWS S3}
+\begin{itemize}
+    \item Developed a full-stack resume analysis platform featuring real-time ATS scoring, gap analysis, and tailored bullet-point recommendations.
+    \item Integrated Google Gemini API using structured JSON schema response prompting to enforce parser accuracy.
+    \item Designed an interactive role-based AI mock interview engine and a scheduling marketplace for peer-to-peer live mock sessions.
+    \item Built a Kanban Job Application Tracker enabling candidates to organize applications from bookmarked stages to active offers.
+\end{itemize}
+
+\textbf{SaaS Task Tracker} \hfill 2025 \\
+\textit{React.js, Node.js, Express.js, PostgreSQL, Prisma ORM, JWT}
+\begin{itemize}
+    \item Developed a multi-tenant SaaS task management platform with role-based access control (RBAC) for Admin, Manager, and Employee users.
+    \item Implemented secure authentication and authorization using JWT and protected API routes.
+    \item Designed RESTful APIs using Express.js and Prisma ORM with PostgreSQL database integration.
+    \item Implemented tenant-based data isolation to support multiple organizations on a single platform.
+\end{itemize}
+
+\textbf{Ray Voice Assistant} \hfill 2024 \\
+\textit{Python, NLP, Speech Recognition}
+\begin{itemize}
+    \item Developed an intelligent voice assistant supporting 15+ command categories using Natural Language Processing.
+    \item Integrated speech-to-text processing with custom intent recognition.
+    \item Automated desktop workflows through voice-controlled commands.
+\end{itemize}
+
+\textbf{Real-Time Object Detection System} \hfill 2025 \\
+\textit{YOLOv8, OpenCV, PyTorch}
+\begin{itemize}
+    \item Implemented YOLOv8-based object detection achieving 87\% mAP on custom datasets.
+    \item Optimized inference speed for real-time industrial applications.
+    \item Applied computer vision techniques for object localization and classification tasks.
+\end{itemize}
+
+% ==================== TECHNICAL SKILLS ====================
+\resumesection{Technical Skills}
+\textbf{Programming Languages:} Python, JavaScript, Java, SQL, C \\
+\textbf{Frontend:} HTML, CSS, React.js, Responsive Design \\
+\textbf{Backend:} Node.js, Express.js, Django REST Framework, REST APIs \\
+\textbf{Databases:} PostgreSQL, MySQL, MongoDB \\
+\textbf{Tools \& Platforms:} Git, GitHub, Linux, Prisma ORM, AWS, Google Cloud, Postman, AWS S3 \\
+\textbf{ML / AI:} TensorFlow, PyTorch, YOLOv8, OpenCV, NLP, LLMs, Google Gemini API
+
+% ==================== CERTIFICATIONS ====================
+\resumesection{Certifications}
+\begin{itemize}
+    \item AWS Academy Cloud Foundations -- Amazon Web Services
+    \item Google Cloud Study Jams -- Generative AI
+    \item HackerRank Problem Solving (Basic)
+\end{itemize}
+
+\end{document}

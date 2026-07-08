@@ -19,6 +19,15 @@ import JobRecommendations from './pages/JobRecommendations';
 import Reports from './pages/Reports';
 import Profile from './pages/Profile';
 import TailorResume from './pages/TailorResume';
+import MockInterview from './pages/MockInterview';
+import BookInterviewer from './pages/BookInterviewer';
+import LiveCallWorkspace from './pages/LiveCallWorkspace';
+import InterviewerDashboard from './pages/InterviewerDashboard';
+import CoverLetterGenerator from './pages/CoverLetterGenerator';
+import JobTracker from './pages/JobTracker';
+import CareerRoadmap from './pages/CareerRoadmap';
+import KeywordVisualizer from './pages/KeywordVisualizer';
+import CodeRefactorer from './pages/CodeRefactorer';
 import NotFound from './pages/NotFound';
 
 function App() {
@@ -45,6 +54,15 @@ function App() {
                 <Route path="/jobs" element={<JobRecommendations />} />
                 <Route path="/reports" element={<Reports />} />
                 <Route path="/resumes/:id/enhance" element={<TailorResume />} />
+                <Route path="/interview-session" element={<MockInterview />} />
+                <Route path="/book-interviewer" element={<BookInterviewer />} />
+                <Route path="/interviewer-dashboard" element={<InterviewerDashboard />} />
+                <Route path="/live-call/:bookingId" element={<LiveCallWorkspace />} />
+                <Route path="/cover-letter" element={<CoverLetterGenerator />} />
+                <Route path="/job-tracker" element={<JobTracker />} />
+                <Route path="/career-roadmap" element={<CareerRoadmap />} />
+                <Route path="/keyword-visualizer" element={<KeywordVisualizer />} />
+                <Route path="/code-refactorer" element={<CodeRefactorer />} />
                 <Route path="/profile" element={<Profile />} />
               </Route>
             </Route>

@@ -187,7 +187,7 @@ export default function InterviewQuestions() {
                             {q.difficulty || difficulty}
                           </span>
                         </div>
-                        <p className="text-slate-200 mb-3">{q.question}</p>
+                        <p className="text-stone-900 font-bold text-base mb-3">{q.question}</p>
                         {q.answer_hint && (
                           <div className="bg-slate-800 rounded-lg p-4">
                             <p className="text-xs text-slate-500 mb-1">Answer Hint</p>

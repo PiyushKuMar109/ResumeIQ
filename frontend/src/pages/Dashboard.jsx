@@ -15,10 +15,40 @@ import {
   Loader2,
   Sparkles,
   Upload,
+  Mail,
+  ListTodo,
+  TrendingUp,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { getSummary } from '../services/dashboardService';
+import { getAnalysisHistory } from '../services/analysisService';
+import { getMockSessions } from '../services/interviewService';
 import { extractData, getErrorMessage, getUserDisplayName } from '../utils/apiHelpers';
+
+import { Line, Bar } from 'react-chartjs-2';
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend,
+} from 'chart.js';
+
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend
+);
+
 
 const quickActions = [
   {
@@ -53,6 +83,22 @@ const quickActions = [
     accent: 'from-violet-100 via-white to-fuchsia-50',
     iconColor: 'text-violet-700',
   },
+  {
+    label: 'Cover Letter Gen',
+    description: 'Generate tailored cover letters and recruiter outreach copy.',
+    icon: Mail,
+    path: '/cover-letter',
+    accent: 'from-pink-100 via-white to-rose-50',
+    iconColor: 'text-pink-700',
+  },
+  {
+    label: 'Kanban Application Tracker',
+    description: 'Track job application stages, interviews, and offers.',
+    icon: ListTodo,
+    path: '/job-tracker',
+    accent: 'from-purple-100 via-white to-violet-50',
+    iconColor: 'text-purple-700',
+  },
 ];
 
 const workflowSteps = [
@@ -66,23 +112,32 @@ export default function Dashboard() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [summary, setSummary] = useState(null);
+  const [analysesHistory, setAnalysesHistory] = useState([]);
+  const [mockSessions, setMockSessions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
   useEffect(() => {
-    const fetchSummary = async () => {
+    const fetchData = async () => {
       try {
         setLoading(true);
-        const response = await getSummary();
-        setSummary(extractData(response));
+        const [sumRes, historyRes, mockRes] = await Promise.all([
+          getSummary(),
+          getAnalysisHistory().catch(() => ({ data: [] })),
+          getMockSessions().catch(() => ({ data: [] })),
+        ]);
+        
+        setSummary(extractData(sumRes));
+        setAnalysesHistory(extractData(historyRes) || []);
+        setMockSessions(extractData(mockRes) || []);
       } catch (err) {
-        setError(getErrorMessage(err, 'Failed to load dashboard summary'));
+        setError(getErrorMessage(err, 'Failed to load dashboard statistics'));
       } finally {
         setLoading(false);
       }
     };
 
-    fetchSummary();
+    fetchData();
   }, []);
 
   const stats = [
@@ -288,6 +343,97 @@ export default function Dashboard() {
               </div>
             </motion.div>
           ))}
+        </section>
+
+        {/* Insights & Analytics Workspace */}
+        <section className="grid gap-6 md:grid-cols-2">
+          {/* Chart 1: ATS Score History */}
+          <div className="rounded-[30px] border border-black/5 bg-white p-6 shadow-[0_18px_55px_rgba(15,23,42,0.06)] md:p-8">
+            <div className="flex items-center justify-between border-b border-stone-150 pb-4 mb-6">
+              <div>
+                <p className="text-[11px] font-bold uppercase tracking-[0.22em] text-stone-400 flex items-center gap-1.5">
+                  <TrendingUp className="w-3.5 h-3.5 text-purple-600" />
+                  ATS Score Progress
+                </p>
+                <h3 className="mt-2 text-xl font-bold tracking-[-0.03em] text-stone-900">
+                  ATS Score History Trend
+                </h3>
+              </div>
+              {analysesHistory.length === 0 && (
+                <span className="text-[10px] bg-amber-50 text-amber-700 border border-amber-200 px-2 py-0.5 rounded-full font-bold">
+                  Demo Dataset
+                </span>
+              )}
+            </div>
+            <div className="h-[250px] flex items-center justify-center">
+              <Line
+                options={{
+                  responsive: true,
+                  maintainAspectRatio: false,
+                  scales: { y: { min: 0, max: 100 } },
+                  plugins: { legend: { display: false } },
+                }}
+                data={{
+                  labels: analysesHistory.length > 0 ? analysesHistory.slice().reverse().map((item) => new Date(item.created_at).toLocaleDateString()) : ['Run 1', 'Run 2', 'Run 3', 'Run 4', 'Run 5'],
+                  datasets: [{
+                    label: 'ATS Score',
+                    data: analysesHistory.length > 0 ? analysesHistory.slice().reverse().map(item => item.ats_score) : [60, 65, 72, 78, 85],
+                    borderColor: 'rgb(147, 51, 234)',
+                    backgroundColor: 'rgba(147, 51, 234, 0.1)',
+                    tension: 0.35,
+                    fill: true,
+                  }]
+                }}
+              />
+            </div>
+          </div>
+
+          {/* Chart 2: Mock Interview Scores */}
+          <div className="rounded-[30px] border border-black/5 bg-white p-6 shadow-[0_18px_55px_rgba(15,23,42,0.06)] md:p-8">
+            <div className="flex items-center justify-between border-b border-stone-150 pb-4 mb-6">
+              <div>
+                <p className="text-[11px] font-bold uppercase tracking-[0.22em] text-stone-400 flex items-center gap-1.5">
+                  <Award className="w-3.5 h-3.5 text-purple-600" />
+                  Interview Analytics
+                </p>
+                <h3 className="mt-2 text-xl font-bold tracking-[-0.03em] text-stone-900">
+                  Mock Interview Score Progression
+                </h3>
+              </div>
+              {mockSessions.length === 0 && (
+                <span className="text-[10px] bg-amber-50 text-amber-700 border border-amber-200 px-2 py-0.5 rounded-full font-bold">
+                  Demo Dataset
+                </span>
+              )}
+            </div>
+            <div className="h-[250px] flex items-center justify-center">
+              <Bar
+                options={{
+                  responsive: true,
+                  maintainAspectRatio: false,
+                  scales: { y: { min: 0, max: 100 } },
+                  plugins: { legend: { display: false } },
+                }}
+                data={{
+                  labels: mockSessions.length > 0 ? mockSessions.slice().reverse().map((item, idx) => `Session #${idx + 1}`) : ['Session 1', 'Session 2', 'Session 3'],
+                  datasets: [{
+                    label: 'Interview Score',
+                    data: mockSessions.length > 0 ? mockSessions.slice().reverse().map(session => {
+                      const qs = session.qa_pairs || [];
+                      if (qs.length === 0) return 0;
+                      const answered = qs.filter(item => item.user_answer);
+                      if (answered.length === 0) return 0;
+                      return Math.round(answered.reduce((sum, item) => sum + item.score, 0) / answered.length);
+                    }) : [45, 62, 78],
+                    backgroundColor: 'rgba(59, 130, 246, 0.7)',
+                    borderColor: 'rgb(59, 130, 246)',
+                    borderWidth: 1.5,
+                    borderRadius: 8,
+                  }]
+                }}
+              />
+            </div>
+          </div>
         </section>
 
         <section className="grid gap-6 xl:grid-cols-[1.35fr_0.65fr]">

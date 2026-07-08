@@ -7,9 +7,21 @@ from rest_framework.permissions import IsAuthenticated
 from django.shortcuts import get_object_or_404
 
 from .models import Resume, ParsedResume, TailoredResume
-from .serializers import ResumeUploadSerializer, ResumeSerializer, TailoredResumeSerializer, TailoredResumeCreateSerializer
+from .serializers import (
+    ResumeUploadSerializer,
+    ResumeSerializer,
+    TailoredResumeSerializer,
+    TailoredResumeCreateSerializer,
+    CoverLetterRequestSerializer,
+)
 from .utils import parse_resume
-from services.gemini_service import generate_tailored_resume
+from services.gemini_service import (
+    generate_tailored_resume,
+    generate_cover_letter,
+    generate_career_roadmap,
+    analyze_keyword_density,
+    refactor_interview_code,
+)
 
 
 class ResumeUploadView(APIView):
@@ -262,3 +274,142 @@ class TailoredResumeDetailView(APIView):
             'success': True,
             'message': 'Tailored resume deleted successfully',
         }, status=status.HTTP_200_OK)
+
+
+class CoverLetterCreateView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        serializer = CoverLetterRequestSerializer(data=request.data)
+        if not serializer.is_valid():
+            return Response({
+                'success': False,
+                'message': 'Invalid cover letter request payload',
+                'errors': serializer.errors,
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        resume_id = serializer.validated_data['resume_id']
+        job_title = serializer.validated_data['job_title']
+        company_name = serializer.validated_data['company_name']
+        job_description = serializer.validated_data.get('job_description', '')
+
+        resume = get_object_or_404(Resume, pk=resume_id, user=request.user)
+        if not (resume.extracted_text or '').strip():
+            return Response({
+                'success': False,
+                'message': 'Resume has no text content. Please parse it first.',
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            letter_data = generate_cover_letter(
+                resume.extracted_text,
+                job_title,
+                company_name,
+                job_description
+            )
+            return Response({
+                'success': True,
+                'message': 'Cover letter and outreach email generated successfully',
+                'data': letter_data,
+            }, status=status.HTTP_250_CREATED if hasattr(status, 'HTTP_250_CREATED') else status.HTTP_201_CREATED)
+        except Exception as e:
+            return Response({
+                'success': False,
+                'message': 'Failed to generate cover letter',
+                'errors': str(e),
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class CareerRoadmapView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        resume_id = request.data.get('resume_id')
+        if not resume_id:
+            return Response({
+                'success': False,
+                'message': 'resume_id is required',
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        resume = get_object_or_404(Resume, pk=resume_id, user=request.user)
+        if not (resume.extracted_text or '').strip():
+            return Response({
+                'success': False,
+                'message': 'Resume content is empty. Please parse it first.',
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            roadmap_data = generate_career_roadmap(resume.extracted_text)
+            return Response({
+                'success': True,
+                'data': roadmap_data,
+            }, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({
+                'success': False,
+                'message': 'Failed to generate career roadmap',
+                'errors': str(e),
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class KeywordDensityView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        resume_id = request.data.get('resume_id')
+        job_description = request.data.get('job_description')
+
+        if not resume_id or not job_description:
+            return Response({
+                'success': False,
+                'message': 'resume_id and job_description are required',
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        resume = get_object_or_404(Resume, pk=resume_id, user=request.user)
+        if not (resume.extracted_text or '').strip():
+            return Response({
+                'success': False,
+                'message': 'Resume content is empty. Please parse it first.',
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            density_data = analyze_keyword_density(resume.extracted_text, job_description)
+            return Response({
+                'success': True,
+                'data': density_data,
+            }, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({
+                'success': False,
+                'message': 'Failed to analyze keyword density',
+                'errors': str(e),
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class CodeRefactorView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        code_text = request.data.get('code_text')
+        language = request.data.get('language', 'python')
+
+        if not code_text:
+            return Response({
+                'success': False,
+                'message': 'code_text is required',
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            refactored_data = refactor_interview_code(code_text, language)
+            return Response({
+                'success': True,
+                'data': refactored_data,
+            }, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({
+                'success': False,
+                'message': 'Failed to refactor code',
+                'errors': str(e),
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+

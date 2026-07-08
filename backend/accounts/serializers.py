@@ -6,6 +6,8 @@ User = get_user_model()
 
 
 class UserSerializer(serializers.ModelSerializer):
+    is_interviewer = serializers.SerializerMethodField()
+
     class Meta:
         model = User
         fields = [
@@ -17,10 +19,15 @@ class UserSerializer(serializers.ModelSerializer):
             'linkedin_profile',
             'github_profile',
             'portfolio_url',
+            'credits',
+            'is_interviewer',
             'created_at',
             'updated_at',
         ]
-        read_only_fields = ['id', 'email', 'created_at', 'updated_at']
+        read_only_fields = ['id', 'email', 'credits', 'is_interviewer', 'created_at', 'updated_at']
+
+    def get_is_interviewer(self, obj):
+        return hasattr(obj, 'interviewer_profile')
 
 
 class RegisterSerializer(serializers.ModelSerializer):

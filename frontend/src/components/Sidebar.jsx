@@ -9,9 +9,16 @@ import {
   User,
   LogOut,
   Sparkles,
+  Mail,
+  ListTodo,
+  Compass,
+  TrendingUp,
+  Code,
+  Calendar,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import BrandLogo from './BrandLogo';
+
 
 const navItems = [
   { label: 'Dashboard', icon: LayoutDashboard, to: '/dashboard' },
@@ -20,11 +27,18 @@ const navItems = [
   { label: 'Job Recommendations', icon: Briefcase, to: '/jobs' },
   { label: 'Reports', icon: FileBarChart, to: '/reports' },
   { label: 'Profile', icon: User, to: '/profile' },
+  { label: 'Mock Interview', icon: Sparkles, to: '/interview-session' },
+  { label: 'Book P2P Interview', icon: Calendar, to: '/book-interviewer' },
+  { label: 'Cover Letter Gen', icon: Mail, to: '/cover-letter' },
+  { label: 'Kanban Tracker', icon: ListTodo, to: '/job-tracker' },
+  { label: 'Career Roadmap', icon: Compass, to: '/career-roadmap' },
+  { label: 'ATS Keyword Cloud', icon: TrendingUp, to: '/keyword-visualizer' },
+  { label: 'Code Refactorer', icon: Code, to: '/code-refactorer' },
 ];
 
 export default function Sidebar() {
   const navigate = useNavigate();
-  const { logout } = useAuth();
+  const { logout, user } = useAuth();
 
   const handleLogout = async () => {
     await logout();
@@ -34,6 +48,13 @@ export default function Sidebar() {
     navigate('/login');
   };
 
+  const activeNavItems = navItems.map(item => {
+    if (item.to === '/book-interviewer' && user?.is_interviewer) {
+      return { label: 'Interviewer Hub', icon: LayoutDashboard, to: '/interviewer-dashboard' };
+    }
+    return item;
+  });
+
   return (
     <aside className="w-64 border-r border-stone-200 bg-[#fcfaf6] flex flex-col justify-between shrink-0 min-h-screen">
       <div>
@@ -42,7 +63,7 @@ export default function Sidebar() {
         </div>
 
         <nav className="p-4 space-y-1">
-          {navItems.map((item) => (
+          {activeNavItems.map((item) => (
             <NavLink
               key={item.to}
               to={item.to}

@@ -51,6 +51,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     linkedin_profile = models.URLField(blank=True, null=True)
     github_profile = models.URLField(blank=True, null=True)
     portfolio_url = models.URLField(blank=True, null=True)
+    credits = models.IntegerField(default=50)
 
     objects = UserManager()
 

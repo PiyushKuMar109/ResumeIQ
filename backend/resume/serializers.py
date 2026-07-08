@@ -56,3 +56,11 @@ class TailoredResumeCreateSerializer(serializers.Serializer):
     job_title = serializers.CharField(max_length=255)
     job_description = serializers.CharField()
 
+
+class CoverLetterRequestSerializer(serializers.Serializer):
+    resume_id = serializers.IntegerField()
+    job_title = serializers.CharField(max_length=255)
+    company_name = serializers.CharField(max_length=255)
+    job_description = serializers.CharField(required=False, allow_blank=True)
+
+

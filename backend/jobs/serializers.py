@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import JobRole, JobRecommendation
+from .models import JobRole, JobRecommendation, JobApplication
 
 
 class JobRoleSerializer(serializers.ModelSerializer):
@@ -22,3 +22,13 @@ class JobRecommendationSerializer(serializers.ModelSerializer):
 
     def get_matched_skills(self, obj):
         return getattr(obj, 'matched_skills', [])
+
+
+class JobApplicationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = JobApplication
+        fields = [
+            'id', 'job_title', 'company_name', 'stage', 'notes',
+            'created_at', 'updated_at'
+        ]
+        read_only_fields = ['id', 'created_at', 'updated_at']

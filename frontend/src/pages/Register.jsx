@@ -88,22 +88,20 @@ export default function Register() {
                   <button
                     type="button"
                     onClick={() => setRole('USER')}
-                    className={`flex-1 py-2 px-3 text-xs font-semibold rounded-lg transition-all cursor-pointer ${
-                      role === 'USER'
-                        ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow'
-                        : 'text-slate-500 hover:bg-slate-50'
-                    }`}
+                    className={`flex-1 py-2 px-3 text-xs font-semibold rounded-lg transition-all cursor-pointer ${role === 'USER'
+                      ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow'
+                      : 'text-slate-500 hover:bg-slate-50'
+                      }`}
                   >
                     User
                   </button>
                   <button
                     type="button"
                     onClick={() => setRole('ADMIN')}
-                    className={`flex-1 py-2 px-3 text-xs font-semibold rounded-lg transition-all cursor-pointer ${
-                      role === 'ADMIN'
-                        ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow'
-                        : 'text-slate-500 hover:bg-slate-50'
-                    }`}
+                    className={`flex-1 py-2 px-3 text-xs font-semibold rounded-lg transition-all cursor-pointer ${role === 'ADMIN'
+                      ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow'
+                      : 'text-slate-500 hover:bg-slate-50'
+                      }`}
                   >
                     Administrator
                   </button>
@@ -126,7 +124,7 @@ export default function Register() {
                       <input
                         type="text"
                         {...register('first_name', { required: 'First name is required' })}
-                        placeholder="John"
+                        placeholder="Your Name"
                         className="w-full bg-white border border-slate-300 focus:border-purple-500 rounded-xl py-2.5 pl-10 pr-4 text-slate-900 placeholder-slate-400 focus:outline-none transition"
                       />
                     </div>
@@ -140,7 +138,7 @@ export default function Register() {
                       <input
                         type="text"
                         {...register('last_name', { required: 'Last name is required' })}
-                        placeholder="Doe"
+                        placeholder="Last Name"
                         className="w-full bg-white border border-slate-300 focus:border-purple-500 rounded-xl py-2.5 pl-10 pr-4 text-slate-900 placeholder-slate-400 focus:outline-none transition"
                       />
                     </div>
@@ -155,7 +153,7 @@ export default function Register() {
                     <input
                       type="email"
                       {...register('email', { required: 'Email is required' })}
-                      placeholder="john.doe@example.com"
+                      placeholder="Your.mail@example.com"
                       className="w-full bg-white border border-slate-300 focus:border-purple-500 rounded-xl py-2.5 pl-10 pr-4 text-slate-900 placeholder-slate-400 focus:outline-none transition"
                     />
                   </div>
